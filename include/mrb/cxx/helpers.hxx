@@ -6,7 +6,10 @@
 #include <mruby/data.h>
 #include <mruby/numeric.h>
 
+template <typename T> static inline mrb_value cxx_mrb_numeric_value(mrb_state*, T);
 template <typename T> static inline T cxx_mrb_cast(mrb_state*, mrb_value);
+template <typename T> static inline T cxx_mrb_get_arg(mrb_state*);
+
 template <> inline float
 cxx_mrb_cast<float>(mrb_state *mrb, mrb_value value)
 {
@@ -19,7 +22,12 @@ cxx_mrb_cast<int>(mrb_state *mrb, mrb_value value)
   return (int)mrb_int(mrb, value);
 }
 
-template <typename T> static inline mrb_value cxx_mrb_numeric_value(mrb_state*, T);
+template <> inline unsigned int
+cxx_mrb_cast<unsigned int>(mrb_state *mrb, mrb_value value)
+{
+  return (unsigned int)mrb_int(mrb, value);
+}
+
 template <> inline mrb_value
 cxx_mrb_numeric_value<float>(mrb_state *mrb, float value)
 {
@@ -32,7 +40,12 @@ cxx_mrb_numeric_value<int>(mrb_state *mrb, int value)
   return mrb_fixnum_value((mrb_int)value);
 }
 
-template <typename T> static inline T cxx_mrb_get_arg(mrb_state*);
+template <> inline mrb_value
+cxx_mrb_numeric_value<unsigned int>(mrb_state *mrb, unsigned int value)
+{
+  return mrb_fixnum_value((mrb_int)value);
+}
+
 template <> inline float
 cxx_mrb_get_arg<float>(mrb_state *mrb)
 {
@@ -47,6 +60,14 @@ cxx_mrb_get_arg<int>(mrb_state *mrb)
   mrb_int value;
   mrb_get_args(mrb, "i", &value);
   return (int)value;
+}
+
+template <> inline unsigned int
+cxx_mrb_get_arg<unsigned int>(mrb_state *mrb)
+{
+  mrb_int value;
+  mrb_get_args(mrb, "i", &value);
+  return (unsigned int)value;
 }
 
 template <> inline bool
