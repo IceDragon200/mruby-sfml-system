@@ -9,7 +9,6 @@
 
 static struct RClass *vector3f_class;
 static struct RClass *vector3i_class;
-static struct RClass *vector3u_class;
 
 template <typename T>
 static void
@@ -23,13 +22,30 @@ vector3_free(mrb_state *mrb, void *ptr)
 
 extern "C" const struct mrb_data_type mrb_sfml_vector3f_type = { "sf::Vector3f", vector3_free<float> };
 extern "C" const struct mrb_data_type mrb_sfml_vector3i_type = { "sf::Vector3i", vector3_free<int> };
-extern "C" const struct mrb_data_type mrb_sfml_vector3u_type = { "sf::Vector3u", vector3_free<unsigned int> };
 
 template <typename T>
 static inline sf::Vector3<T>*
 get_vector3(mrb_state *mrb, mrb_value self)
 {
   return (sf::Vector3<T>*)mrb_data_get_ptr(mrb, self, mrb_get_sfml_vector3_type<T>());
+}
+
+extern "C" mrb_value
+mrb_sfml_vector3f_value(mrb_state *mrb, sf::Vector3f v)
+{
+  mrb_value result = mrb_obj_new(mrb, vector3f_class, 0, NULL);
+  sf::Vector3f *target = get_vector3<float>(mrb, result);
+  *target = v;
+  return result;
+}
+
+extern "C" mrb_value
+mrb_sfml_vector3i_value(mrb_state *mrb, sf::Vector3i v)
+{
+  mrb_value result = mrb_obj_new(mrb, vector3i_class, 0, NULL);
+  sf::Vector3i *target = get_vector3<int>(mrb, result);
+  *target = v;
+  return result;
 }
 
 template <typename T>
@@ -107,6 +123,63 @@ vector3_set_z(mrb_state *mrb, mrb_value self)
   return self;
 }
 
+template <typename T>
+static mrb_value
+vector3_negate(mrb_state *mrb, mrb_value self)
+{
+  return mrb_sfml_vector3_value<T>(mrb, -(*get_vector3<T>(mrb, self)));
+}
+
+template <typename T>
+static mrb_value
+vector3_op_add(mrb_state *mrb, mrb_value self)
+{
+  sf::Vector3<T> *vec;
+  mrb_get_args(mrb, "d", &vec, mrb_get_sfml_vector3_type<T>());
+  return mrb_sfml_vector3_value<T>(mrb, (*get_vector3<T>(mrb, self)) + (*vec));
+}
+
+template <typename T>
+static mrb_value
+vector3_op_sub(mrb_state *mrb, mrb_value self)
+{
+  sf::Vector3<T> *vec;
+  mrb_get_args(mrb, "d", &vec, mrb_get_sfml_vector3_type<T>());
+  return mrb_sfml_vector3_value<T>(mrb, (*get_vector3<T>(mrb, self)) - (*vec));
+}
+
+template <typename T>
+static mrb_value
+vector3_op_mul(mrb_state *mrb, mrb_value self)
+{
+  mrb_float f;
+  mrb_get_args(mrb, "f", &f);
+  return mrb_sfml_vector3_value<T>(mrb, (*get_vector3<T>(mrb, self)) * static_cast<T>(f));
+}
+
+template <typename T>
+static mrb_value
+vector3_op_div(mrb_state *mrb, mrb_value self)
+{
+  mrb_float f;
+  mrb_get_args(mrb, "f", &f);
+  return mrb_sfml_vector3_value<T>(mrb, (*get_vector3<T>(mrb, self)) / static_cast<T>(f));
+}
+
+template <typename T>
+static mrb_value
+vector3_equal(mrb_state *mrb, mrb_value self)
+{
+  mrb_value obj;
+  mrb_get_args(mrb, "o", &obj);
+  if (mrb_type(obj) == MRB_TT_DATA) {
+    if (DATA_TYPE(obj) == mrb_get_sfml_vector3_type<T>()) {
+      return mrb_bool_value((*get_vector3<T>(mrb, obj)) == (*get_vector3<T>(mrb, self)));
+    }
+  }
+  return mrb_bool_value(false);
+}
+
 template <typename T> static void
 vector3_bind_class(mrb_state *mrb, struct RClass *cls)
 {
@@ -118,6 +191,12 @@ vector3_bind_class(mrb_state *mrb, struct RClass *cls)
   mrb_define_method(mrb, cls, "x=",              vector3_set_x<T>,           MRB_ARGS_REQ(1));
   mrb_define_method(mrb, cls, "y=",              vector3_set_y<T>,           MRB_ARGS_REQ(1));
   mrb_define_method(mrb, cls, "z=",              vector3_set_z<T>,           MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, cls, "-@",              vector3_negate<T>,          MRB_ARGS_NONE());
+  mrb_define_method(mrb, cls, "+",               vector3_op_add<T>,          MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, cls, "-",               vector3_op_sub<T>,          MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, cls, "*",               vector3_op_mul<T>,          MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, cls, "/",               vector3_op_div<T>,          MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, cls, "==",              vector3_equal<T>,           MRB_ARGS_REQ(1));
 }
 
 extern "C" void
@@ -132,8 +211,4 @@ mrb_sfml_vector3_init_bind(mrb_state *mrb, struct RClass *mod)
   vector3i_class = mrb_define_class_under(mrb, mod, "Vector3i", vector3_class);
   MRB_SET_INSTANCE_TT(vector3i_class, MRB_TT_DATA);
   vector3_bind_class<int>(mrb, vector3i_class);
-
-  vector3u_class = mrb_define_class_under(mrb, mod, "Vector3u", vector3_class);
-  MRB_SET_INSTANCE_TT(vector3u_class, MRB_TT_DATA);
-  vector3_bind_class<unsigned int>(mrb, vector3u_class);
 }

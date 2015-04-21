@@ -120,6 +120,63 @@ vector2_set_y(mrb_state *mrb, mrb_value self)
   return self;
 }
 
+template <typename T>
+static mrb_value
+vector2_negate(mrb_state *mrb, mrb_value self)
+{
+  return mrb_sfml_vector2_value<T>(mrb, -(*get_vector2<T>(mrb, self)));
+}
+
+template <typename T>
+static mrb_value
+vector2_op_add(mrb_state *mrb, mrb_value self)
+{
+  sf::Vector2<T> *vec;
+  mrb_get_args(mrb, "d", &vec, mrb_get_sfml_vector2_type<T>());
+  return mrb_sfml_vector2_value<T>(mrb, (*get_vector2<T>(mrb, self)) + (*vec));
+}
+
+template <typename T>
+static mrb_value
+vector2_op_sub(mrb_state *mrb, mrb_value self)
+{
+  sf::Vector2<T> *vec;
+  mrb_get_args(mrb, "d", &vec, mrb_get_sfml_vector2_type<T>());
+  return mrb_sfml_vector2_value<T>(mrb, (*get_vector2<T>(mrb, self)) - (*vec));
+}
+
+template <typename T>
+static mrb_value
+vector2_op_mul(mrb_state *mrb, mrb_value self)
+{
+  mrb_float f;
+  mrb_get_args(mrb, "f", &f);
+  return mrb_sfml_vector2_value<T>(mrb, (*get_vector2<T>(mrb, self)) * static_cast<T>(f));
+}
+
+template <typename T>
+static mrb_value
+vector2_op_div(mrb_state *mrb, mrb_value self)
+{
+  mrb_float f;
+  mrb_get_args(mrb, "f", &f);
+  return mrb_sfml_vector2_value<T>(mrb, (*get_vector2<T>(mrb, self)) / static_cast<T>(f));
+}
+
+template <typename T>
+static mrb_value
+vector2_equal(mrb_state *mrb, mrb_value self)
+{
+  mrb_value obj;
+  mrb_get_args(mrb, "o", &obj);
+  if (mrb_type(obj) == MRB_TT_DATA) {
+    if (DATA_TYPE(obj) == mrb_get_sfml_vector2_type<T>()) {
+      return mrb_bool_value((*get_vector2<T>(mrb, obj)) == (*get_vector2<T>(mrb, self)));
+    }
+  }
+  return mrb_bool_value(false);
+}
+
 template <typename T> static void
 vector2_bind_class(mrb_state *mrb, struct RClass *cls)
 {
@@ -129,6 +186,12 @@ vector2_bind_class(mrb_state *mrb, struct RClass *cls)
   mrb_define_method(mrb, cls, "y",               vector2_get_y<T>,           MRB_ARGS_NONE());
   mrb_define_method(mrb, cls, "x=",              vector2_set_x<T>,           MRB_ARGS_REQ(1));
   mrb_define_method(mrb, cls, "y=",              vector2_set_y<T>,           MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, cls, "-@",              vector2_negate<T>,          MRB_ARGS_NONE());
+  mrb_define_method(mrb, cls, "+",               vector2_op_add<T>,          MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, cls, "-",               vector2_op_sub<T>,          MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, cls, "*",               vector2_op_mul<T>,          MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, cls, "/",               vector2_op_div<T>,          MRB_ARGS_REQ(1));
+  mrb_define_method(mrb, cls, "==",              vector2_equal<T>,           MRB_ARGS_REQ(1));
 }
 
 extern "C" void
