@@ -37,6 +37,7 @@ static mrb_value
 time_initialize(mrb_state *mrb, mrb_value self)
 {
   sf::Time *tme = new sf::Time();
+  time_free(mrb, DATA_PTR(self));
   mrb_data_init(self, tme, &mrb_sfml_time_type);
   return self;
 }

@@ -29,6 +29,7 @@ static mrb_value
 clock_initialize(mrb_state *mrb, mrb_value self)
 {
   sf::Clock *klock = new sf::Clock();
+  clock_free(mrb, DATA_PTR(self));
   mrb_data_init(self, klock, &mrb_sfml_clock_type);
   return self;
 }

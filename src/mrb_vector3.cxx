@@ -73,6 +73,7 @@ vector3_initialize(mrb_state *mrb, mrb_value self)
     mrb_raise(mrb, E_ARGUMENT_ERROR, "expected 0 or 3");
     return self;
   }
+  vector3_free<T>(mrb, DATA_PTR(self));
   mrb_data_init(self, vector3, mrb_get_sfml_vector3_type<T>());
   return self;
 }

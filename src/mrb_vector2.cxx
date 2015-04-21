@@ -84,7 +84,7 @@ vector2_initialize(mrb_state *mrb, mrb_value self)
     vector2 = new sf::Vector2<T>(cxx_mrb_cast<T>(mrb, x), cxx_mrb_cast<T>(mrb, y));
   } else {
     mrb_raise(mrb, E_ARGUMENT_ERROR, "expected 0 or 2");
-    return self;
+    return mrb_nil_value();
   }
   vector2_free<T>(mrb, DATA_PTR(self));
   mrb_data_init(self, vector2, mrb_get_sfml_vector2_type<T>());
