@@ -10,6 +10,24 @@ template <typename T> static inline mrb_value cxx_mrb_numeric_value(mrb_state*, 
 template <typename T> static inline T cxx_mrb_cast(mrb_state*, mrb_value);
 template <typename T> static inline T cxx_mrb_get_arg(mrb_state*);
 
+static inline void
+cxx_mrb_ensure_type_data(mrb_state *mrb, mrb_value self)
+{
+  if (mrb_type(self) != MRB_TT_DATA) {
+    mrb_check_type(mrb, self, MRB_TT_DATA);
+  }
+}
+
+template <typename T>
+static inline T*
+cxx_mrb_data_get_ptr(mrb_state *mrb, mrb_value self)
+{
+  cxx_mrb_ensure_type_data(mrb, self);
+  T *shape = static_cast<T*>(DATA_PTR(self));
+  assert(shape);
+  return shape;
+}
+
 template <> inline float
 cxx_mrb_cast<float>(mrb_state *mrb, mrb_value value)
 {
