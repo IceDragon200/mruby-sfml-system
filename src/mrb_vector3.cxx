@@ -52,11 +52,21 @@ template <typename T>
 static mrb_value
 vector3_initialize(mrb_state *mrb, mrb_value self)
 {
+  sf::Vector3<T> *vector3;
   mrb_value x, y, z;
   mrb_int argc = mrb_get_args(mrb, "|ooo", &x, &y, &z);
-  sf::Vector3<T> *vector3;
   if (argc == 0) {
     vector3 = new sf::Vector3<T>();
+  } else if (argc == 1) {
+    cxx_mrb_ensure_type_data(mrb, x);
+    if (DATA_TYPE(x) == &mrb_sfml_vector3f_type) {
+      vector3 = new sf::Vector3<T>(*get_vector3<float>(mrb, x));
+    } else if (DATA_TYPE(x) == &mrb_sfml_vector3i_type) {
+      vector3 = new sf::Vector3<T>(*get_vector3<int>(mrb, x));
+    } else {
+      mrb_raise(mrb, E_TYPE_ERROR, "Expected kind of Vector3");
+      return mrb_nil_value();
+    }
   } else if (argc == 3) {
     vector3 = new sf::Vector3<T>(cxx_mrb_cast<T>(mrb, x), cxx_mrb_cast<T>(mrb, y), cxx_mrb_cast<T>(mrb, z));
   } else {

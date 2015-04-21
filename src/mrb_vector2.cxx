@@ -63,11 +63,23 @@ template <typename T>
 static mrb_value
 vector2_initialize(mrb_state *mrb, mrb_value self)
 {
+  sf::Vector2<T> *vector2;
   mrb_value x, y;
   mrb_int argc = mrb_get_args(mrb, "|oo", &x, &y);
-  sf::Vector2<T> *vector2;
   if (argc == 0) {
     vector2 = new sf::Vector2<T>();
+  } else if (argc == 1) {
+    cxx_mrb_ensure_type_data(mrb, x);
+    if (DATA_TYPE(x) == &mrb_sfml_vector2f_type) {
+      vector2 = new sf::Vector2<T>(*get_vector2<float>(mrb, x));
+    } else if (DATA_TYPE(x) == &mrb_sfml_vector2i_type) {
+      vector2 = new sf::Vector2<T>(*get_vector2<int>(mrb, x));
+    } else if (DATA_TYPE(x) == &mrb_sfml_vector2u_type) {
+      vector2 = new sf::Vector2<T>(*get_vector2<unsigned int>(mrb, x));
+    } else {
+      mrb_raise(mrb, E_TYPE_ERROR, "Expected kind of Vector2");
+      return mrb_nil_value();
+    }
   } else if (argc == 2) {
     vector2 = new sf::Vector2<T>(cxx_mrb_cast<T>(mrb, x), cxx_mrb_cast<T>(mrb, y));
   } else {
