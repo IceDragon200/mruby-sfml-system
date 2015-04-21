@@ -13,37 +13,37 @@ template <typename T> static inline T cxx_mrb_get_arg(mrb_state*);
 template <> inline float
 cxx_mrb_cast<float>(mrb_state *mrb, mrb_value value)
 {
-  return (float)mrb_to_flo(mrb, value);
+  return static_cast<float>(mrb_to_flo(mrb, value));
 }
 
 template <> inline int
 cxx_mrb_cast<int>(mrb_state *mrb, mrb_value value)
 {
-  return (int)mrb_int(mrb, value);
+  return static_cast<int>(mrb_int(mrb, value));
 }
 
 template <> inline unsigned int
 cxx_mrb_cast<unsigned int>(mrb_state *mrb, mrb_value value)
 {
-  return (unsigned int)mrb_int(mrb, value);
+  return static_cast<unsigned int>(mrb_int(mrb, value));
 }
 
 template <> inline mrb_value
 cxx_mrb_numeric_value<float>(mrb_state *mrb, float value)
 {
-  return mrb_float_value(mrb, (mrb_float)value);
+  return mrb_float_value(mrb, static_cast<mrb_float>(value));
 }
 
 template <> inline mrb_value
 cxx_mrb_numeric_value<int>(mrb_state *mrb, int value)
 {
-  return mrb_fixnum_value((mrb_int)value);
+  return mrb_fixnum_value(static_cast<mrb_int>(value));
 }
 
 template <> inline mrb_value
 cxx_mrb_numeric_value<unsigned int>(mrb_state *mrb, unsigned int value)
 {
-  return mrb_fixnum_value((mrb_int)value);
+  return mrb_fixnum_value(static_cast<mrb_int>(value));
 }
 
 template <> inline float
@@ -51,7 +51,7 @@ cxx_mrb_get_arg<float>(mrb_state *mrb)
 {
   mrb_float value;
   mrb_get_args(mrb, "f", &value);
-  return (float)value;
+  return static_cast<float>(value);
 }
 
 template <> inline int
@@ -59,7 +59,7 @@ cxx_mrb_get_arg<int>(mrb_state *mrb)
 {
   mrb_int value;
   mrb_get_args(mrb, "i", &value);
-  return (int)value;
+  return static_cast<int>(value);
 }
 
 template <> inline unsigned int
@@ -67,7 +67,7 @@ cxx_mrb_get_arg<unsigned int>(mrb_state *mrb)
 {
   mrb_int value;
   mrb_get_args(mrb, "i", &value);
-  return (unsigned int)value;
+  return static_cast<unsigned int>(value);
 }
 
 template <> inline bool
@@ -75,7 +75,7 @@ cxx_mrb_get_arg<bool>(mrb_state *mrb)
 {
   mrb_bool value;
   mrb_get_args(mrb, "b", &value);
-  return (bool)value;
+  return static_cast<bool>(value);
 }
 
 #endif
