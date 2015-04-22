@@ -7,8 +7,9 @@
 #include "mrb_time.hxx"
 
 static struct RClass *time_class;
+static mrb_data_free_func time_free = cxx_mrb_data_free<sf::Time>;
 
-extern "C" const struct mrb_data_type mrb_sfml_time_type = { "sf::Time", cxx_mrb_data_free<sf::Time> };
+extern "C" const struct mrb_data_type mrb_sfml_time_type = { "sf::Time", time_free };
 
 extern "C" mrb_value
 mrb_sfml_time_value(mrb_state *mrb, sf::Time tme)
@@ -23,7 +24,7 @@ static mrb_value
 time_initialize(mrb_state *mrb, mrb_value self)
 {
   sf::Time *tme = new sf::Time();
-  cxx_mrb_data_free<sf::Time>(mrb, DATA_PTR(self));
+  time_free(mrb, DATA_PTR(self));
   mrb_data_init(self, tme, &mrb_sfml_time_type);
   return self;
 }

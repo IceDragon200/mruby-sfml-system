@@ -8,14 +8,15 @@
 #include "mrb/sfml/system/time.hxx"
 
 static struct RClass *clock_class;
+static mrb_data_free_func clock_free = cxx_mrb_data_free<sf::Clock>;
 
-extern "C" const struct mrb_data_type mrb_sfml_clock_type = { "sf::Clock", cxx_mrb_data_free<sf::Clock> };
+extern "C" const struct mrb_data_type mrb_sfml_clock_type = { "sf::Clock", clock_free };
 
 static mrb_value
 clock_initialize(mrb_state *mrb, mrb_value self)
 {
   sf::Clock *klock = new sf::Clock();
-  cxx_mrb_data_free<sf::Clock>(mrb, DATA_PTR(self));
+  clock_free(mrb, DATA_PTR(self));
   mrb_data_init(self, klock, &mrb_sfml_clock_type);
   return self;
 }
