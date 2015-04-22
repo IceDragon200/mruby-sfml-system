@@ -3,33 +3,19 @@
 #include <mruby/data.h>
 #include <SFML/System/Clock.hpp>
 #include "mrb_clock.hxx"
+#include "mrb/cxx/helpers.hxx"
 #include "mrb/sfml/system/clock.hxx"
 #include "mrb/sfml/system/time.hxx"
 
 static struct RClass *clock_class;
 
-static void
-clock_free(mrb_state *mrb, void *ptr)
-{
-  if (ptr) {
-    sf::Clock *klock = (sf::Clock*)ptr;
-    delete klock;
-  }
-}
-
-extern "C" const struct mrb_data_type mrb_sfml_clock_type = { "sf::Clock", clock_free };
-
-static inline sf::Clock*
-get_clock(mrb_state *mrb, mrb_value self)
-{
-  return (sf::Clock*)mrb_data_get_ptr(mrb, self, &mrb_sfml_clock_type);
-}
+extern "C" const struct mrb_data_type mrb_sfml_clock_type = { "sf::Clock", cxx_mrb_data_free<sf::Clock> };
 
 static mrb_value
 clock_initialize(mrb_state *mrb, mrb_value self)
 {
   sf::Clock *klock = new sf::Clock();
-  clock_free(mrb, DATA_PTR(self));
+  cxx_mrb_data_free<sf::Clock>(mrb, DATA_PTR(self));
   mrb_data_init(self, klock, &mrb_sfml_clock_type);
   return self;
 }
@@ -37,13 +23,13 @@ clock_initialize(mrb_state *mrb, mrb_value self)
 static mrb_value
 clock_get_elapsed_time(mrb_state *mrb, mrb_value self)
 {
-  return mrb_sfml_time_value(mrb, get_clock(mrb, self)->getElapsedTime());
+  return mrb_sfml_time_value(mrb, mrb_sfml_clock_ptr(mrb, self)->getElapsedTime());
 }
 
 static mrb_value
 clock_restart(mrb_state *mrb, mrb_value self)
 {
-  return mrb_sfml_time_value(mrb, get_clock(mrb, self)->restart());
+  return mrb_sfml_time_value(mrb, mrb_sfml_clock_ptr(mrb, self)->restart());
 }
 
 extern "C" void

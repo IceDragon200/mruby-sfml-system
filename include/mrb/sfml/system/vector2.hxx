@@ -22,4 +22,29 @@ template <> inline const mrb_data_type* mrb_get_sfml_vector2_type<float>() { ret
 template <> inline const mrb_data_type* mrb_get_sfml_vector2_type<int>() { return &mrb_sfml_vector2i_type; };
 template <> inline const mrb_data_type* mrb_get_sfml_vector2_type<unsigned int>() { return &mrb_sfml_vector2u_type; };
 
+template <typename T>
+static inline sf::Vector2<T>*
+mrb_sfml_vector2_ptr(mrb_state *mrb, mrb_value self)
+{
+  return static_cast<sf::Vector2<T>*>(mrb_data_get_ptr(mrb, self, mrb_get_sfml_vector2_type<T>()));
+}
+
+static inline sf::Vector2f*
+mrb_sfml_vector2f_ptr(mrb_state *mrb, mrb_value self)
+{
+  return mrb_sfml_vector2_ptr<float>(mrb, self);
+}
+
+static inline sf::Vector2i*
+mrb_sfml_vector2i_ptr(mrb_state *mrb, mrb_value self)
+{
+  return mrb_sfml_vector2_ptr<int>(mrb, self);
+}
+
+static inline sf::Vector2u*
+mrb_sfml_vector2u_ptr(mrb_state *mrb, mrb_value self)
+{
+  return mrb_sfml_vector2_ptr<unsigned int>(mrb, self);
+}
+
 #endif

@@ -3,38 +3,21 @@
 #include <mruby/data.h>
 #include <mruby/numeric.h>
 #include <SFML/System/Vector3.hpp>
-#include "mrb_vector3.hxx"
-#include "mrb/sfml/system/vector3.hxx"
 #include "mrb/cxx/helpers.hxx"
+#include "mrb/sfml/system/vector3.hxx"
+#include "mrb_vector3.hxx"
 
 static struct RClass *vector3f_class;
 static struct RClass *vector3i_class;
 
-template <typename T>
-static void
-vector3_free(mrb_state *mrb, void *ptr)
-{
-  if (ptr) {
-    sf::Vector3<T> *vector3 = (sf::Vector3<T>*)ptr;
-    delete vector3;
-  }
-}
-
-extern "C" const struct mrb_data_type mrb_sfml_vector3f_type = { "sf::Vector3f", vector3_free<float> };
-extern "C" const struct mrb_data_type mrb_sfml_vector3i_type = { "sf::Vector3i", vector3_free<int> };
-
-template <typename T>
-static inline sf::Vector3<T>*
-get_vector3(mrb_state *mrb, mrb_value self)
-{
-  return (sf::Vector3<T>*)mrb_data_get_ptr(mrb, self, mrb_get_sfml_vector3_type<T>());
-}
+extern "C" const struct mrb_data_type mrb_sfml_vector3f_type = { "sf::Vector3f", cxx_mrb_data_free<sf::Vector3f> };
+extern "C" const struct mrb_data_type mrb_sfml_vector3i_type = { "sf::Vector3i", cxx_mrb_data_free<sf::Vector3i> };
 
 extern "C" mrb_value
 mrb_sfml_vector3f_value(mrb_state *mrb, sf::Vector3f v)
 {
   mrb_value result = mrb_obj_new(mrb, vector3f_class, 0, NULL);
-  sf::Vector3f *target = get_vector3<float>(mrb, result);
+  sf::Vector3f *target = mrb_sfml_vector3_ptr<float>(mrb, result);
   *target = v;
   return result;
 }
@@ -43,7 +26,7 @@ extern "C" mrb_value
 mrb_sfml_vector3i_value(mrb_state *mrb, sf::Vector3i v)
 {
   mrb_value result = mrb_obj_new(mrb, vector3i_class, 0, NULL);
-  sf::Vector3i *target = get_vector3<int>(mrb, result);
+  sf::Vector3i *target = mrb_sfml_vector3_ptr<int>(mrb, result);
   *target = v;
   return result;
 }
@@ -60,9 +43,9 @@ vector3_initialize(mrb_state *mrb, mrb_value self)
   } else if (argc == 1) {
     cxx_mrb_ensure_type_data(mrb, x);
     if (DATA_TYPE(x) == &mrb_sfml_vector3f_type) {
-      vector3 = new sf::Vector3<T>(*get_vector3<float>(mrb, x));
+      vector3 = new sf::Vector3<T>(*mrb_sfml_vector3_ptr<float>(mrb, x));
     } else if (DATA_TYPE(x) == &mrb_sfml_vector3i_type) {
-      vector3 = new sf::Vector3<T>(*get_vector3<int>(mrb, x));
+      vector3 = new sf::Vector3<T>(*mrb_sfml_vector3_ptr<int>(mrb, x));
     } else {
       mrb_raise(mrb, E_TYPE_ERROR, "Expected kind of Vector3");
       return mrb_nil_value();
@@ -73,7 +56,7 @@ vector3_initialize(mrb_state *mrb, mrb_value self)
     mrb_raise(mrb, E_ARGUMENT_ERROR, "expected 0 or 3");
     return self;
   }
-  vector3_free<T>(mrb, DATA_PTR(self));
+  cxx_mrb_data_free<sf::Vector3<T>>(mrb, DATA_PTR(self));
   mrb_data_init(self, vector3, mrb_get_sfml_vector3_type<T>());
   return self;
 }
@@ -84,7 +67,7 @@ vector3_initialize_copy(mrb_state *mrb, mrb_value self)
 {
   sf::Vector3<T> *other;
   mrb_get_args(mrb, "d", &other, mrb_get_sfml_vector3_type<T>());
-  vector3_free<T>(mrb, DATA_PTR(self));
+  cxx_mrb_data_free<sf::Vector3<T>>(mrb, DATA_PTR(self));
   mrb_data_init(self, new sf::Vector3<T>(*other), mrb_get_sfml_vector3_type<T>());
   return self;
 }
@@ -93,28 +76,28 @@ template <typename T>
 static mrb_value
 vector3_get_x(mrb_state *mrb, mrb_value self)
 {
-  return cxx_mrb_numeric_value<T>(mrb, get_vector3<T>(mrb, self)->x);
+  return cxx_mrb_numeric_value<T>(mrb, mrb_sfml_vector3_ptr<T>(mrb, self)->x);
 }
 
 template <typename T>
 static mrb_value
 vector3_get_y(mrb_state *mrb, mrb_value self)
 {
-  return cxx_mrb_numeric_value<T>(mrb, get_vector3<T>(mrb, self)->y);
+  return cxx_mrb_numeric_value<T>(mrb, mrb_sfml_vector3_ptr<T>(mrb, self)->y);
 }
 
 template <typename T>
 static mrb_value
 vector3_get_z(mrb_state *mrb, mrb_value self)
 {
-  return cxx_mrb_numeric_value<T>(mrb, get_vector3<T>(mrb, self)->z);
+  return cxx_mrb_numeric_value<T>(mrb, mrb_sfml_vector3_ptr<T>(mrb, self)->z);
 }
 
 template <typename T>
 static mrb_value
 vector3_set_x(mrb_state *mrb, mrb_value self)
 {
-  get_vector3<T>(mrb, self)->x = cxx_mrb_get_arg<T>(mrb);
+  mrb_sfml_vector3_ptr<T>(mrb, self)->x = cxx_mrb_get_arg<T>(mrb);
   return self;
 }
 
@@ -122,7 +105,7 @@ template <typename T>
 static mrb_value
 vector3_set_y(mrb_state *mrb, mrb_value self)
 {
-  get_vector3<T>(mrb, self)->y = cxx_mrb_get_arg<T>(mrb);
+  mrb_sfml_vector3_ptr<T>(mrb, self)->y = cxx_mrb_get_arg<T>(mrb);
   return self;
 }
 
@@ -130,7 +113,7 @@ template <typename T>
 static mrb_value
 vector3_set_z(mrb_state *mrb, mrb_value self)
 {
-  get_vector3<T>(mrb, self)->z = cxx_mrb_get_arg<T>(mrb);
+  mrb_sfml_vector3_ptr<T>(mrb, self)->z = cxx_mrb_get_arg<T>(mrb);
   return self;
 }
 
@@ -138,7 +121,7 @@ template <typename T>
 static mrb_value
 vector3_negate(mrb_state *mrb, mrb_value self)
 {
-  return mrb_sfml_vector3_value<T>(mrb, -(*get_vector3<T>(mrb, self)));
+  return mrb_sfml_vector3_value<T>(mrb, -(*mrb_sfml_vector3_ptr<T>(mrb, self)));
 }
 
 template <typename T>
@@ -147,7 +130,7 @@ vector3_op_add(mrb_state *mrb, mrb_value self)
 {
   sf::Vector3<T> *vec;
   mrb_get_args(mrb, "d", &vec, mrb_get_sfml_vector3_type<T>());
-  return mrb_sfml_vector3_value<T>(mrb, (*get_vector3<T>(mrb, self)) + (*vec));
+  return mrb_sfml_vector3_value<T>(mrb, (*mrb_sfml_vector3_ptr<T>(mrb, self)) + (*vec));
 }
 
 template <typename T>
@@ -156,7 +139,7 @@ vector3_op_sub(mrb_state *mrb, mrb_value self)
 {
   sf::Vector3<T> *vec;
   mrb_get_args(mrb, "d", &vec, mrb_get_sfml_vector3_type<T>());
-  return mrb_sfml_vector3_value<T>(mrb, (*get_vector3<T>(mrb, self)) - (*vec));
+  return mrb_sfml_vector3_value<T>(mrb, (*mrb_sfml_vector3_ptr<T>(mrb, self)) - (*vec));
 }
 
 template <typename T>
@@ -165,7 +148,7 @@ vector3_op_mul(mrb_state *mrb, mrb_value self)
 {
   mrb_float f;
   mrb_get_args(mrb, "f", &f);
-  return mrb_sfml_vector3_value<T>(mrb, (*get_vector3<T>(mrb, self)) * static_cast<T>(f));
+  return mrb_sfml_vector3_value<T>(mrb, (*mrb_sfml_vector3_ptr<T>(mrb, self)) * static_cast<T>(f));
 }
 
 template <typename T>
@@ -174,7 +157,7 @@ vector3_op_div(mrb_state *mrb, mrb_value self)
 {
   mrb_float f;
   mrb_get_args(mrb, "f", &f);
-  return mrb_sfml_vector3_value<T>(mrb, (*get_vector3<T>(mrb, self)) / static_cast<T>(f));
+  return mrb_sfml_vector3_value<T>(mrb, (*mrb_sfml_vector3_ptr<T>(mrb, self)) / static_cast<T>(f));
 }
 
 template <typename T>
@@ -185,7 +168,7 @@ vector3_equal(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "o", &obj);
   if (mrb_type(obj) == MRB_TT_DATA) {
     if (DATA_TYPE(obj) == mrb_get_sfml_vector3_type<T>()) {
-      return mrb_bool_value((*get_vector3<T>(mrb, obj)) == (*get_vector3<T>(mrb, self)));
+      return mrb_bool_value((*mrb_sfml_vector3_ptr<T>(mrb, obj)) == (*mrb_sfml_vector3_ptr<T>(mrb, self)));
     }
   }
   return mrb_bool_value(false);

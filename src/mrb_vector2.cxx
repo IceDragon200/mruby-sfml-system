@@ -3,40 +3,23 @@
 #include <mruby/data.h>
 #include <mruby/numeric.h>
 #include <SFML/System/Vector2.hpp>
-#include "mrb_vector2.hxx"
 #include "mrb/sfml/system/vector2.hxx"
 #include "mrb/cxx/helpers.hxx"
+#include "mrb_vector2.hxx"
 
 static struct RClass *vector2f_class;
 static struct RClass *vector2i_class;
 static struct RClass *vector2u_class;
 
-template <typename T>
-static void
-vector2_free(mrb_state *mrb, void *ptr)
-{
-  if (ptr) {
-    sf::Vector2<T> *vector2 = (sf::Vector2<T>*)ptr;
-    delete vector2;
-  }
-}
-
-extern "C" const struct mrb_data_type mrb_sfml_vector2f_type = { "sf::Vector2f", vector2_free<float> };
-extern "C" const struct mrb_data_type mrb_sfml_vector2i_type = { "sf::Vector2i", vector2_free<int> };
-extern "C" const struct mrb_data_type mrb_sfml_vector2u_type = { "sf::Vector2u", vector2_free<unsigned int> };
-
-template <typename T>
-static inline sf::Vector2<T>*
-get_vector2(mrb_state *mrb, mrb_value self)
-{
-  return (sf::Vector2<T>*)mrb_data_get_ptr(mrb, self, mrb_get_sfml_vector2_type<T>());
-}
+extern "C" const struct mrb_data_type mrb_sfml_vector2f_type = { "sf::Vector2f", cxx_mrb_data_free<sf::Vector2f> };
+extern "C" const struct mrb_data_type mrb_sfml_vector2i_type = { "sf::Vector2i", cxx_mrb_data_free<sf::Vector2i> };
+extern "C" const struct mrb_data_type mrb_sfml_vector2u_type = { "sf::Vector2u", cxx_mrb_data_free<sf::Vector2u> };
 
 extern "C" mrb_value
 mrb_sfml_vector2f_value(mrb_state *mrb, sf::Vector2f v)
 {
   mrb_value result = mrb_obj_new(mrb, vector2f_class, 0, NULL);
-  sf::Vector2f *target = get_vector2<float>(mrb, result);
+  sf::Vector2f *target = mrb_sfml_vector2_ptr<float>(mrb, result);
   *target = v;
   return result;
 }
@@ -45,7 +28,7 @@ extern "C" mrb_value
 mrb_sfml_vector2i_value(mrb_state *mrb, sf::Vector2i v)
 {
   mrb_value result = mrb_obj_new(mrb, vector2i_class, 0, NULL);
-  sf::Vector2i *target = get_vector2<int>(mrb, result);
+  sf::Vector2i *target = mrb_sfml_vector2_ptr<int>(mrb, result);
   *target = v;
   return result;
 }
@@ -54,7 +37,7 @@ extern "C" mrb_value
 mrb_sfml_vector2u_value(mrb_state *mrb, sf::Vector2u v)
 {
   mrb_value result = mrb_obj_new(mrb, vector2u_class, 0, NULL);
-  sf::Vector2u *target = get_vector2<unsigned int>(mrb, result);
+  sf::Vector2u *target = mrb_sfml_vector2_ptr<unsigned int>(mrb, result);
   *target = v;
   return result;
 }
@@ -71,11 +54,11 @@ vector2_initialize(mrb_state *mrb, mrb_value self)
   } else if (argc == 1) {
     cxx_mrb_ensure_type_data(mrb, x);
     if (DATA_TYPE(x) == &mrb_sfml_vector2f_type) {
-      vector2 = new sf::Vector2<T>(*get_vector2<float>(mrb, x));
+      vector2 = new sf::Vector2<T>(*mrb_sfml_vector2_ptr<float>(mrb, x));
     } else if (DATA_TYPE(x) == &mrb_sfml_vector2i_type) {
-      vector2 = new sf::Vector2<T>(*get_vector2<int>(mrb, x));
+      vector2 = new sf::Vector2<T>(*mrb_sfml_vector2_ptr<int>(mrb, x));
     } else if (DATA_TYPE(x) == &mrb_sfml_vector2u_type) {
-      vector2 = new sf::Vector2<T>(*get_vector2<unsigned int>(mrb, x));
+      vector2 = new sf::Vector2<T>(*mrb_sfml_vector2_ptr<unsigned int>(mrb, x));
     } else {
       mrb_raise(mrb, E_TYPE_ERROR, "Expected kind of Vector2");
       return mrb_nil_value();
@@ -86,7 +69,7 @@ vector2_initialize(mrb_state *mrb, mrb_value self)
     mrb_raise(mrb, E_ARGUMENT_ERROR, "expected 0 or 2");
     return mrb_nil_value();
   }
-  vector2_free<T>(mrb, DATA_PTR(self));
+  cxx_mrb_data_free<sf::Vector2<T>>(mrb, DATA_PTR(self));
   mrb_data_init(self, vector2, mrb_get_sfml_vector2_type<T>());
   return self;
 }
@@ -97,7 +80,7 @@ vector2_initialize_copy(mrb_state *mrb, mrb_value self)
 {
   sf::Vector2<T> *other;
   mrb_get_args(mrb, "d", &other, mrb_get_sfml_vector2_type<T>());
-  vector2_free<T>(mrb, DATA_PTR(self));
+  cxx_mrb_data_free<sf::Vector2<T>>(mrb, DATA_PTR(self));
   mrb_data_init(self, new sf::Vector2<T>(*other), mrb_get_sfml_vector2_type<T>());
   return self;
 }
@@ -106,21 +89,21 @@ template <typename T>
 static mrb_value
 vector2_get_x(mrb_state *mrb, mrb_value self)
 {
-  return cxx_mrb_numeric_value<T>(mrb, get_vector2<T>(mrb, self)->x);
+  return cxx_mrb_numeric_value<T>(mrb, mrb_sfml_vector2_ptr<T>(mrb, self)->x);
 }
 
 template <typename T>
 static mrb_value
 vector2_get_y(mrb_state *mrb, mrb_value self)
 {
-  return cxx_mrb_numeric_value<T>(mrb, get_vector2<T>(mrb, self)->y);
+  return cxx_mrb_numeric_value<T>(mrb, mrb_sfml_vector2_ptr<T>(mrb, self)->y);
 }
 
 template <typename T>
 static mrb_value
 vector2_set_x(mrb_state *mrb, mrb_value self)
 {
-  get_vector2<T>(mrb, self)->x = cxx_mrb_get_arg<T>(mrb);
+  mrb_sfml_vector2_ptr<T>(mrb, self)->x = cxx_mrb_get_arg<T>(mrb);
   return self;
 }
 
@@ -128,7 +111,7 @@ template <typename T>
 static mrb_value
 vector2_set_y(mrb_state *mrb, mrb_value self)
 {
-  get_vector2<T>(mrb, self)->y = cxx_mrb_get_arg<T>(mrb);
+  mrb_sfml_vector2_ptr<T>(mrb, self)->y = cxx_mrb_get_arg<T>(mrb);
   return self;
 }
 
@@ -136,7 +119,7 @@ template <typename T>
 static mrb_value
 vector2_negate(mrb_state *mrb, mrb_value self)
 {
-  return mrb_sfml_vector2_value<T>(mrb, -(*get_vector2<T>(mrb, self)));
+  return mrb_sfml_vector2_value<T>(mrb, -(*mrb_sfml_vector2_ptr<T>(mrb, self)));
 }
 
 template <typename T>
@@ -145,7 +128,7 @@ vector2_op_add(mrb_state *mrb, mrb_value self)
 {
   sf::Vector2<T> *vec;
   mrb_get_args(mrb, "d", &vec, mrb_get_sfml_vector2_type<T>());
-  return mrb_sfml_vector2_value<T>(mrb, (*get_vector2<T>(mrb, self)) + (*vec));
+  return mrb_sfml_vector2_value<T>(mrb, (*mrb_sfml_vector2_ptr<T>(mrb, self)) + (*vec));
 }
 
 template <typename T>
@@ -154,7 +137,7 @@ vector2_op_sub(mrb_state *mrb, mrb_value self)
 {
   sf::Vector2<T> *vec;
   mrb_get_args(mrb, "d", &vec, mrb_get_sfml_vector2_type<T>());
-  return mrb_sfml_vector2_value<T>(mrb, (*get_vector2<T>(mrb, self)) - (*vec));
+  return mrb_sfml_vector2_value<T>(mrb, (*mrb_sfml_vector2_ptr<T>(mrb, self)) - (*vec));
 }
 
 template <typename T>
@@ -163,7 +146,7 @@ vector2_op_mul(mrb_state *mrb, mrb_value self)
 {
   mrb_float f;
   mrb_get_args(mrb, "f", &f);
-  return mrb_sfml_vector2_value<T>(mrb, (*get_vector2<T>(mrb, self)) * static_cast<T>(f));
+  return mrb_sfml_vector2_value<T>(mrb, (*mrb_sfml_vector2_ptr<T>(mrb, self)) * static_cast<T>(f));
 }
 
 template <typename T>
@@ -172,7 +155,7 @@ vector2_op_div(mrb_state *mrb, mrb_value self)
 {
   mrb_float f;
   mrb_get_args(mrb, "f", &f);
-  return mrb_sfml_vector2_value<T>(mrb, (*get_vector2<T>(mrb, self)) / static_cast<T>(f));
+  return mrb_sfml_vector2_value<T>(mrb, (*mrb_sfml_vector2_ptr<T>(mrb, self)) / static_cast<T>(f));
 }
 
 template <typename T>
@@ -183,7 +166,7 @@ vector2_equal(mrb_state *mrb, mrb_value self)
   mrb_get_args(mrb, "o", &obj);
   if (mrb_type(obj) == MRB_TT_DATA) {
     if (DATA_TYPE(obj) == mrb_get_sfml_vector2_type<T>()) {
-      return mrb_bool_value((*get_vector2<T>(mrb, obj)) == (*get_vector2<T>(mrb, self)));
+      return mrb_bool_value((*mrb_sfml_vector2_ptr<T>(mrb, obj)) == (*mrb_sfml_vector2_ptr<T>(mrb, self)));
     }
   }
   return mrb_bool_value(false);

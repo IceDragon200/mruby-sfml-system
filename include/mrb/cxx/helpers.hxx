@@ -1,14 +1,33 @@
-#ifndef MRB_CXX_HELPERS
-#define MRB_CXX_HELPERS
+#ifndef MRB_CXX_HELPERS_H
+#define MRB_CXX_HELPERS_H
 
 #include <mruby.h>
 #include <mruby/class.h>
 #include <mruby/data.h>
 #include <mruby/numeric.h>
 
+typedef void (*mrb_data_free_func)(mrb_state *mrb, void*);
+
 template <typename T> static inline mrb_value cxx_mrb_numeric_value(mrb_state*, T);
 template <typename T> static inline T cxx_mrb_cast(mrb_state*, mrb_value);
 template <typename T> static inline T cxx_mrb_get_arg(mrb_state*);
+
+template <typename T>
+static void
+cxx_mrb_data_free(mrb_state *mrb, void *ptr)
+{
+  if (ptr) {
+    T *data = static_cast<T*>(ptr);
+    delete data;
+  }
+}
+
+template <typename T>
+static void
+cxx_mrb_data_free_value(mrb_state *mrb, mrb_value self)
+{
+  cxx_mrb_data_free<T>(mrb, DATA_PTR(self));
+}
 
 static inline void
 cxx_mrb_ensure_type_data(mrb_state *mrb, mrb_value self)

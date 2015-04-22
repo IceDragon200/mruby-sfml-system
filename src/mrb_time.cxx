@@ -2,33 +2,19 @@
 #include <mruby/class.h>
 #include <mruby/data.h>
 #include <SFML/System/Time.hpp>
-#include "mrb_time.hxx"
+#include "mrb/cxx/helpers.hxx"
 #include "mrb/sfml/system/time.hxx"
+#include "mrb_time.hxx"
 
 static struct RClass *time_class;
 
-static void
-time_free(mrb_state *mrb, void *ptr)
-{
-  if (ptr) {
-    sf::Time *klock = (sf::Time*)ptr;
-    delete klock;
-  }
-}
-
-extern "C" const struct mrb_data_type mrb_sfml_time_type = { "sf::Time", time_free };
-
-static inline sf::Time*
-get_time(mrb_state *mrb, mrb_value self)
-{
-  return (sf::Time*)mrb_data_get_ptr(mrb, self, &mrb_sfml_time_type);
-}
+extern "C" const struct mrb_data_type mrb_sfml_time_type = { "sf::Time", cxx_mrb_data_free<sf::Time> };
 
 extern "C" mrb_value
 mrb_sfml_time_value(mrb_state *mrb, sf::Time tme)
 {
   mrb_value result = mrb_obj_new(mrb, time_class, 0, NULL);
-  sf::Time *rtme = get_time(mrb, result);
+  sf::Time *rtme = mrb_sfml_time_ptr(mrb, result);
   *rtme = tme;
   return result;
 }
@@ -37,7 +23,7 @@ static mrb_value
 time_initialize(mrb_state *mrb, mrb_value self)
 {
   sf::Time *tme = new sf::Time();
-  time_free(mrb, DATA_PTR(self));
+  cxx_mrb_data_free<sf::Time>(mrb, DATA_PTR(self));
   mrb_data_init(self, tme, &mrb_sfml_time_type);
   return self;
 }
@@ -45,19 +31,19 @@ time_initialize(mrb_state *mrb, mrb_value self)
 static mrb_value
 time_as_seconds(mrb_state *mrb, mrb_value self)
 {
-  return mrb_float_value(mrb, get_time(mrb, self)->asSeconds());
+  return mrb_float_value(mrb, mrb_sfml_time_ptr(mrb, self)->asSeconds());
 }
 
 static mrb_value
 time_as_milliseconds(mrb_state *mrb, mrb_value self)
 {
-  return mrb_fixnum_value(get_time(mrb, self)->asMilliseconds());
+  return mrb_fixnum_value(mrb_sfml_time_ptr(mrb, self)->asMilliseconds());
 }
 
 static mrb_value
 time_as_microseconds(mrb_state *mrb, mrb_value self)
 {
-  return mrb_fixnum_value(get_time(mrb, self)->asMicroseconds());
+  return mrb_fixnum_value(mrb_sfml_time_ptr(mrb, self)->asMicroseconds());
 }
 
 static mrb_value
@@ -66,7 +52,7 @@ time_compare(mrb_state *mrb, mrb_value self)
   sf::Time *tme;
   sf::Time *other;
   mrb_get_args(mrb, "d", &other, &mrb_sfml_time_type);
-  tme = get_time(mrb, self);
+  tme = mrb_sfml_time_ptr(mrb, self);
   return mrb_fixnum_value((*tme < *other) ? -1 : ((*tme > *other) ? 1 : 0));
 }
 
@@ -76,7 +62,7 @@ time_add(mrb_state *mrb, mrb_value self)
   sf::Time *tme;
   sf::Time *other;
   mrb_get_args(mrb, "d", &other, &mrb_sfml_time_type);
-  tme = get_time(mrb, self);
+  tme = mrb_sfml_time_ptr(mrb, self);
   return mrb_sfml_time_value(mrb, (*tme) + (*other));
 }
 
@@ -86,7 +72,7 @@ time_sub(mrb_state *mrb, mrb_value self)
   sf::Time *tme;
   sf::Time *other;
   mrb_get_args(mrb, "d", &other, &mrb_sfml_time_type);
-  tme = get_time(mrb, self);
+  tme = mrb_sfml_time_ptr(mrb, self);
   return mrb_sfml_time_value(mrb, (*tme) - (*other));
 }
 
@@ -96,7 +82,7 @@ time_mul(mrb_state *mrb, mrb_value self)
   sf::Time *tme;
   mrb_float other;
   mrb_get_args(mrb, "f", &other);
-  tme = get_time(mrb, self);
+  tme = mrb_sfml_time_ptr(mrb, self);
   return mrb_sfml_time_value(mrb, (*tme) * (float)(other));
 }
 
@@ -106,7 +92,7 @@ time_div(mrb_state *mrb, mrb_value self)
   sf::Time *tme;
   mrb_float other;
   mrb_get_args(mrb, "f", &other);
-  tme = get_time(mrb, self);
+  tme = mrb_sfml_time_ptr(mrb, self);
   return mrb_sfml_time_value(mrb, (*tme) / (float)(other));
 }
 
