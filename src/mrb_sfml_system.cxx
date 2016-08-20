@@ -1,11 +1,11 @@
 #include <mruby.h>
 #include <mruby/class.h>
 #include <SFML/System.hpp>
+#include "mrb/sfml/system/time.hxx"
 #include "mrb_clock.hxx"
 #include "mrb_time.hxx"
 #include "mrb_vector2.hxx"
 #include "mrb_vector3.hxx"
-#include "mrb/sfml/system/time.hxx"
 
 static struct RClass *sfml_module;
 
