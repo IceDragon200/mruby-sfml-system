@@ -10,10 +10,10 @@
 static struct RClass *vector3f_class;
 static struct RClass *vector3i_class;
 
-extern "C" const struct mrb_data_type mrb_sfml_vector3f_type = { "sf::Vector3f", cxx_mrb_data_free<sf::Vector3f> };
-extern "C" const struct mrb_data_type mrb_sfml_vector3i_type = { "sf::Vector3i", cxx_mrb_data_free<sf::Vector3i> };
+MRB_SFML_EXTERN const struct mrb_data_type mrb_sfml_vector3f_type = { "sf::Vector3f", cxx_mrb_data_free<sf::Vector3f> };
+MRB_SFML_EXTERN const struct mrb_data_type mrb_sfml_vector3i_type = { "sf::Vector3i", cxx_mrb_data_free<sf::Vector3i> };
 
-extern "C" mrb_value
+MRB_SFML_EXTERN mrb_value
 mrb_sfml_vector3f_value(mrb_state *mrb, sf::Vector3f v)
 {
   mrb_value result = mrb_obj_new(mrb, vector3f_class, 0, NULL);
@@ -22,7 +22,7 @@ mrb_sfml_vector3f_value(mrb_state *mrb, sf::Vector3f v)
   return result;
 }
 
-extern "C" mrb_value
+MRB_SFML_EXTERN mrb_value
 mrb_sfml_vector3i_value(mrb_state *mrb, sf::Vector3i v)
 {
   mrb_value result = mrb_obj_new(mrb, vector3i_class, 0, NULL);
@@ -193,7 +193,7 @@ vector3_bind_class(mrb_state *mrb, struct RClass *cls)
   mrb_define_method(mrb, cls, "==",              vector3_equal<T>,           MRB_ARGS_REQ(1));
 }
 
-extern "C" void
+MRB_SFML_EXTERN void
 mrb_sfml_vector3_init_bind(mrb_state *mrb, struct RClass *mod)
 {
   struct RClass *vector3_class = mrb_define_class_under(mrb, mod, "Vector3", mrb->object_class);

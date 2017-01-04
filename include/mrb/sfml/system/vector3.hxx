@@ -4,11 +4,12 @@
 #include <mruby.h>
 #include <mruby/data.h>
 #include <SFML/System/Vector3.hpp>
+#include "mrb/sfml/helpers.hxx"
 
-extern "C" const struct mrb_data_type mrb_sfml_vector3f_type;
-extern "C" const struct mrb_data_type mrb_sfml_vector3i_type;
-extern "C" mrb_value mrb_sfml_vector3f_value(mrb_state*, sf::Vector3f);
-extern "C" mrb_value mrb_sfml_vector3i_value(mrb_state*, sf::Vector3i);
+MRB_SFML_EXTERN const struct mrb_data_type mrb_sfml_vector3f_type;
+MRB_SFML_EXTERN const struct mrb_data_type mrb_sfml_vector3i_type;
+MRB_SFML_EXTERN mrb_value mrb_sfml_vector3f_value(mrb_state*, sf::Vector3f);
+MRB_SFML_EXTERN mrb_value mrb_sfml_vector3i_value(mrb_state*, sf::Vector3i);
 
 template <typename T> static inline mrb_value mrb_sfml_vector3_value(mrb_state*, sf::Vector3<T>);
 template <> inline mrb_value mrb_sfml_vector3_value<float>(mrb_state *mrb, sf::Vector3f v) { return mrb_sfml_vector3f_value(mrb, v); }

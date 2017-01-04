@@ -4,13 +4,14 @@
 #include <mruby.h>
 #include <mruby/data.h>
 #include <SFML/System/Vector2.hpp>
+#include "mrb/sfml/helpers.hxx"
 
-extern "C" const struct mrb_data_type mrb_sfml_vector2f_type;
-extern "C" const struct mrb_data_type mrb_sfml_vector2i_type;
-extern "C" const struct mrb_data_type mrb_sfml_vector2u_type;
-extern "C" mrb_value mrb_sfml_vector2f_value(mrb_state*, sf::Vector2f);
-extern "C" mrb_value mrb_sfml_vector2i_value(mrb_state*, sf::Vector2i);
-extern "C" mrb_value mrb_sfml_vector2u_value(mrb_state*, sf::Vector2u);
+MRB_SFML_EXTERN const struct mrb_data_type mrb_sfml_vector2f_type;
+MRB_SFML_EXTERN const struct mrb_data_type mrb_sfml_vector2i_type;
+MRB_SFML_EXTERN const struct mrb_data_type mrb_sfml_vector2u_type;
+MRB_SFML_EXTERN mrb_value mrb_sfml_vector2f_value(mrb_state*, sf::Vector2f);
+MRB_SFML_EXTERN mrb_value mrb_sfml_vector2i_value(mrb_state*, sf::Vector2i);
+MRB_SFML_EXTERN mrb_value mrb_sfml_vector2u_value(mrb_state*, sf::Vector2u);
 
 template <typename T> static inline mrb_value mrb_sfml_vector2_value(mrb_state*, sf::Vector2<T>);
 template <> inline mrb_value mrb_sfml_vector2_value<float>(mrb_state *mrb, sf::Vector2f v) { return mrb_sfml_vector2f_value(mrb, v); }

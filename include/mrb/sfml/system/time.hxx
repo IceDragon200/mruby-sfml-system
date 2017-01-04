@@ -4,9 +4,10 @@
 #include <mruby.h>
 #include <mruby/data.h>
 #include <SFML/System/Time.hpp>
+#include "mrb/sfml/helpers.hxx"
 
-extern "C" const struct mrb_data_type mrb_sfml_time_type;
-extern "C" mrb_value mrb_sfml_time_value(mrb_state*, sf::Time);
+MRB_SFML_EXTERN const struct mrb_data_type mrb_sfml_time_type;
+MRB_SFML_EXTERN mrb_value mrb_sfml_time_value(mrb_state*, sf::Time);
 
 static inline sf::Time*
 mrb_sfml_time_ptr(mrb_state *mrb, mrb_value self)

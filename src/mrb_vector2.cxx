@@ -11,11 +11,11 @@ static struct RClass *vector2f_class;
 static struct RClass *vector2i_class;
 static struct RClass *vector2u_class;
 
-extern "C" const struct mrb_data_type mrb_sfml_vector2f_type = { "sf::Vector2f", cxx_mrb_data_free<sf::Vector2f> };
-extern "C" const struct mrb_data_type mrb_sfml_vector2i_type = { "sf::Vector2i", cxx_mrb_data_free<sf::Vector2i> };
-extern "C" const struct mrb_data_type mrb_sfml_vector2u_type = { "sf::Vector2u", cxx_mrb_data_free<sf::Vector2u> };
+MRB_SFML_EXTERN const struct mrb_data_type mrb_sfml_vector2f_type = { "sf::Vector2f", cxx_mrb_data_free<sf::Vector2f> };
+MRB_SFML_EXTERN const struct mrb_data_type mrb_sfml_vector2i_type = { "sf::Vector2i", cxx_mrb_data_free<sf::Vector2i> };
+MRB_SFML_EXTERN const struct mrb_data_type mrb_sfml_vector2u_type = { "sf::Vector2u", cxx_mrb_data_free<sf::Vector2u> };
 
-extern "C" mrb_value
+MRB_SFML_EXTERN mrb_value
 mrb_sfml_vector2f_value(mrb_state *mrb, sf::Vector2f v)
 {
   mrb_value result = mrb_obj_new(mrb, vector2f_class, 0, NULL);
@@ -24,7 +24,7 @@ mrb_sfml_vector2f_value(mrb_state *mrb, sf::Vector2f v)
   return result;
 }
 
-extern "C" mrb_value
+MRB_SFML_EXTERN mrb_value
 mrb_sfml_vector2i_value(mrb_state *mrb, sf::Vector2i v)
 {
   mrb_value result = mrb_obj_new(mrb, vector2i_class, 0, NULL);
@@ -33,7 +33,7 @@ mrb_sfml_vector2i_value(mrb_state *mrb, sf::Vector2i v)
   return result;
 }
 
-extern "C" mrb_value
+MRB_SFML_EXTERN mrb_value
 mrb_sfml_vector2u_value(mrb_state *mrb, sf::Vector2u v)
 {
   mrb_value result = mrb_obj_new(mrb, vector2u_class, 0, NULL);
@@ -189,7 +189,7 @@ vector2_bind_class(mrb_state *mrb, struct RClass *cls)
   mrb_define_method(mrb, cls, "==",              vector2_equal<T>,           MRB_ARGS_REQ(1));
 }
 
-extern "C" void
+MRB_SFML_EXTERN void
 mrb_sfml_vector2_init_bind(mrb_state *mrb, struct RClass *mod)
 {
   struct RClass *vector2_class = mrb_define_class_under(mrb, mod, "Vector2", mrb->object_class);

@@ -9,9 +9,9 @@
 static struct RClass *time_class;
 static mrb_data_free_func time_free = cxx_mrb_data_free<sf::Time>;
 
-extern "C" const struct mrb_data_type mrb_sfml_time_type = { "sf::Time", time_free };
+MRB_SFML_EXTERN const struct mrb_data_type mrb_sfml_time_type = { "sf::Time", time_free };
 
-extern "C" mrb_value
+MRB_SFML_EXTERN mrb_value
 mrb_sfml_time_value(mrb_state *mrb, sf::Time tme)
 {
   mrb_value result = mrb_obj_new(mrb, time_class, 0, NULL);
@@ -97,7 +97,7 @@ time_div(mrb_state *mrb, mrb_value self)
   return mrb_sfml_time_value(mrb, (*tme) / (float)(other));
 }
 
-extern "C" void
+MRB_SFML_EXTERN void
 mrb_sfml_time_init_bind(mrb_state *mrb, struct RClass *mod)
 {
   time_class = mrb_define_class_under(mrb, mod, "Time", mrb->object_class);
