@@ -5,7 +5,7 @@
 #include <mruby/string.h>
 #include <SFML/Config.hpp>
 
-#define MRB_SFML_EXTERN extern
+#define MRB_SFML_EXTERN extern "C"
 
 template <typename T> static inline mrb_value sfml_value_to_mrb(mrb_state*, T);
 
